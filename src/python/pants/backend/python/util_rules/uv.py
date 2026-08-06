@@ -28,6 +28,8 @@ from pants.backend.python.util_rules.lockfile_metadata import (
 from pants.backend.python.util_rules.pex_environment import PythonExecutable
 from pants.backend.python.util_rules.pex_requirements import (
     LoadedLockfile,
+    ResolveConfigRequest,
+    determine_resolve_config,
     generate_uv_index_config,
 )
 from pants.base.build_root import BuildRoot
@@ -195,19 +197,31 @@ async def create_venv_repository_from_uv_lockfile(
         )
     metadata: PythonLockfileMetadataV8 = cast(PythonLockfileMetadataV8, request.lockfile.metadata)
 
+    # We need the named indexes from `[python-repos]` so that private-index credentials
+    # (e.g. `UV_INDEX_<NAME>_USERNAME`/`PASSWORD`, set via `[uv].extra_env_vars`) have an
+    # index of the same name to bind to during `uv sync`, matching what was used to
+    # generate the lockfile in the first place.
+    resolve_config = await determine_resolve_config(
+        ResolveConfigRequest(metadata.resolve), **implicitly()
+    )
+
     pyproject_content = generate_pyproject_toml(
         metadata.resolve,
         metadata.valid_for_interpreter_constraints,
         tuple(str(req) for req in metadata.requirements),
+        indexes=resolve_config.indexes,
     )
+
+    # Only the index declarations are needed here (not find-links/no-binary/etc., which
+    # are resolution-time concerns already baked into the frozen lockfile).
+    uv_toml_content = "\n".join(generate_uv_index_config(resolve_config.indexes, "index")) + "\n"
 
     uv_config_digest, uv_lock_contents = await concurrently(
         create_digest(
             CreateDigest(
                 (
                     FileContent("pyproject.toml", pyproject_content.encode()),
-                    # Nothing to put in config right now, but we need it to be present.
-                    FileContent("uv.toml", b""),
+                    FileContent("uv.toml", uv_toml_content.encode()),
                 )
             )
         ),
