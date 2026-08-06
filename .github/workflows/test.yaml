@@ -17,12 +17,12 @@ jobs:
     env:
       PANTS_REMOTE_CACHE_READ: 'false'
       PANTS_REMOTE_CACHE_WRITE: 'false'
-    if: (github.repository_owner == 'pantsbuild') && (needs.classify_changes.outputs.no_code != 'true')
+    if: (true) && (needs.classify_changes.outputs.no_code != 'true')
     name: Bootstrap Pants, test Rust (Linux-ARM64)
     needs:
     - classify_changes
     runs-on:
-    - depot-ubuntu-24.04-arm-8
+    - ubuntu-24.04-arm
     steps:
     - name: Free up disk space
       uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
@@ -128,12 +128,12 @@ jobs:
     env:
       PANTS_REMOTE_CACHE_READ: 'false'
       PANTS_REMOTE_CACHE_WRITE: 'false'
-    if: (github.repository_owner == 'pantsbuild') && (needs.classify_changes.outputs.no_code != 'true')
+    if: (true) && (needs.classify_changes.outputs.no_code != 'true')
     name: Bootstrap Pants, test and lint Rust (Linux-x86_64)
     needs:
     - classify_changes
     runs-on:
-    - depot-ubuntu-22.04-8
+    - ubuntu-22.04
     steps:
     - name: Free up disk space
       uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
@@ -248,12 +248,12 @@ jobs:
     env:
       PANTS_REMOTE_CACHE_READ: 'false'
       PANTS_REMOTE_CACHE_WRITE: 'false'
-    if: (github.repository_owner == 'pantsbuild') && (needs.classify_changes.outputs.no_code != 'true')
+    if: (true) && (needs.classify_changes.outputs.no_code != 'true')
     name: Bootstrap Pants, test Rust (macOS14-ARM64)
     needs:
     - classify_changes
     runs-on:
-    - depot-macos-14
+    - macos-14
     steps:
     - name: Free up disk space
       uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
@@ -362,7 +362,7 @@ jobs:
       MODE: debug
       PANTS_REMOTE_CACHE_READ: 'false'
       PANTS_REMOTE_CACHE_WRITE: 'false'
-    if: ((github.repository_owner == 'pantsbuild') && (needs.classify_changes.outputs.release == 'true' || needs.classify_changes.outputs.ci_config == 'true')) && (needs.classify_changes.outputs.no_code != 'true')
+    if: ((true) && (needs.classify_changes.outputs.release == 'true' || needs.classify_changes.outputs.ci_config == 'true')) && (needs.classify_changes.outputs.no_code != 'true')
     name: Build wheels (Linux-ARM64, cp314)
     needs:
     - classify_changes
@@ -371,7 +371,7 @@ jobs:
       contents: write
       id-token: write
     runs-on:
-    - depot-ubuntu-24.04-arm-8
+    - ubuntu-24.04-arm
     steps:
     - name: Free up disk space
       run: |-
@@ -452,7 +452,7 @@ jobs:
       MODE: debug
       PANTS_REMOTE_CACHE_READ: 'false'
       PANTS_REMOTE_CACHE_WRITE: 'false'
-    if: ((github.repository_owner == 'pantsbuild') && (needs.classify_changes.outputs.release == 'true' || needs.classify_changes.outputs.ci_config == 'true')) && (needs.classify_changes.outputs.no_code != 'true')
+    if: ((true) && (needs.classify_changes.outputs.release == 'true' || needs.classify_changes.outputs.ci_config == 'true')) && (needs.classify_changes.outputs.no_code != 'true')
     name: Build wheels (Linux-x86_64, cp314)
     needs:
     - classify_changes
@@ -461,7 +461,7 @@ jobs:
       contents: write
       id-token: write
     runs-on:
-    - depot-ubuntu-22.04-8
+    - ubuntu-22.04
     steps:
     - name: Free up disk space
       run: |-
@@ -548,7 +548,7 @@ jobs:
       MODE: debug
       PANTS_REMOTE_CACHE_READ: 'false'
       PANTS_REMOTE_CACHE_WRITE: 'false'
-    if: ((github.repository_owner == 'pantsbuild') && (needs.classify_changes.outputs.release == 'true' || needs.classify_changes.outputs.ci_config == 'true')) && (needs.classify_changes.outputs.no_code != 'true')
+    if: ((true) && (needs.classify_changes.outputs.release == 'true' || needs.classify_changes.outputs.ci_config == 'true')) && (needs.classify_changes.outputs.no_code != 'true')
     name: Build wheels (macOS14-ARM64, cp314)
     needs:
     - classify_changes
@@ -557,7 +557,7 @@ jobs:
       contents: write
       id-token: write
     runs-on:
-    - depot-macos-14
+    - macos-14
     steps:
     - name: Free up disk space
       uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
@@ -660,7 +660,7 @@ jobs:
       MODE: debug
       PANTS_REMOTE_CACHE_READ: 'false'
       PANTS_REMOTE_CACHE_WRITE: 'false'
-    if: ((github.repository_owner == 'pantsbuild') && (needs.classify_changes.outputs.release == 'true' || needs.classify_changes.outputs.ci_config == 'true')) && (needs.classify_changes.outputs.no_code != 'true')
+    if: ((true) && (needs.classify_changes.outputs.release == 'true' || needs.classify_changes.outputs.ci_config == 'true')) && (needs.classify_changes.outputs.no_code != 'true')
     name: Build wheels (Linux-ARM64, cp314t)
     needs:
     - classify_changes
@@ -669,7 +669,7 @@ jobs:
       contents: write
       id-token: write
     runs-on:
-    - depot-ubuntu-24.04-arm-8
+    - ubuntu-24.04-arm
     steps:
     - name: Free up disk space
       run: |-
@@ -750,7 +750,7 @@ jobs:
       MODE: debug
       PANTS_REMOTE_CACHE_READ: 'false'
       PANTS_REMOTE_CACHE_WRITE: 'false'
-    if: ((github.repository_owner == 'pantsbuild') && (needs.classify_changes.outputs.release == 'true' || needs.classify_changes.outputs.ci_config == 'true')) && (needs.classify_changes.outputs.no_code != 'true')
+    if: ((true) && (needs.classify_changes.outputs.release == 'true' || needs.classify_changes.outputs.ci_config == 'true')) && (needs.classify_changes.outputs.no_code != 'true')
     name: Build wheels (Linux-x86_64, cp314t)
     needs:
     - classify_changes
@@ -759,7 +759,7 @@ jobs:
       contents: write
       id-token: write
     runs-on:
-    - depot-ubuntu-22.04-8
+    - ubuntu-22.04
     steps:
     - name: Free up disk space
       run: |-
@@ -846,7 +846,7 @@ jobs:
       MODE: debug
       PANTS_REMOTE_CACHE_READ: 'false'
       PANTS_REMOTE_CACHE_WRITE: 'false'
-    if: ((github.repository_owner == 'pantsbuild') && (needs.classify_changes.outputs.release == 'true' || needs.classify_changes.outputs.ci_config == 'true')) && (needs.classify_changes.outputs.no_code != 'true')
+    if: ((true) && (needs.classify_changes.outputs.release == 'true' || needs.classify_changes.outputs.ci_config == 'true')) && (needs.classify_changes.outputs.no_code != 'true')
     name: Build wheels (macOS14-ARM64, cp314t)
     needs:
     - classify_changes
@@ -855,7 +855,7 @@ jobs:
       contents: write
       id-token: write
     runs-on:
-    - depot-macos-14
+    - macos-14
     steps:
     - name: Free up disk space
       uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
@@ -951,7 +951,7 @@ jobs:
         path: .pants.d/workdir/*.log
     timeout-minutes: 90
   build_windows11_x86_64:
-    if: (github.repository_owner == 'pantsbuild') && (needs.classify_changes.outputs.no_code != 'true')
+    if: (false) && (needs.classify_changes.outputs.no_code != 'true')
     name: Test in-progress Windows support
     needs:
     - classify_changes
@@ -985,12 +985,12 @@ jobs:
       shell: msys2 {0}
     timeout-minutes: 60
   check_release_notes:
-    if: github.repository_owner == 'pantsbuild'
+    if: 'true'
     name: Ensure PR has release notes
     needs:
     - classify_changes
     runs-on:
-    - depot-ubuntu-22.04-8
+    - ubuntu-22.04
     steps:
     - env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -1014,7 +1014,7 @@ jobs:
           Feel free to ask a maintainer for help if you are not sure what is appropriate!
         mode: minimum
   classify_changes:
-    if: github.repository_owner == 'pantsbuild'
+    if: 'true'
     name: Classify changes
     outputs:
       ci_config: ${{ steps.classify.outputs.ci_config }}
@@ -1026,7 +1026,7 @@ jobs:
       release: ${{ steps.classify.outputs.release }}
       rust: ${{ steps.classify.outputs.rust }}
     runs-on:
-    - depot-ubuntu-22.04-8
+    - ubuntu-22.04
     steps:
     - name: Check out code
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -1069,20 +1069,20 @@ jobs:
     - test_python_macos14_arm64
     - classify_changes
     runs-on:
-    - depot-ubuntu-22.04-8
+    - ubuntu-22.04
     steps:
     - uses: coverallsapp/github-action@5cbfd81b66ca5d10c19b062c04de0199c215fb6e # v2.3.7
       with:
         fail-on-error: false
         parallel-finished: true
   lint_python:
-    if: (github.repository_owner == 'pantsbuild') && (needs.classify_changes.outputs.no_code != 'true')
+    if: (true) && (needs.classify_changes.outputs.no_code != 'true')
     name: Lint Python and Shell
     needs:
     - bootstrap_pants_linux_x86_64
     - classify_changes
     runs-on:
-    - depot-ubuntu-22.04-8
+    - ubuntu-22.04
     steps:
     - name: Check out code
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -1154,7 +1154,7 @@ jobs:
     needs:
     - set_merge_ok
     runs-on:
-    - depot-ubuntu-22.04-8
+    - ubuntu-22.04
     steps:
     - run: |
         merge_ok="${{ needs.set_merge_ok.outputs.merge_ok }}"
@@ -1200,19 +1200,19 @@ jobs:
     outputs:
       merge_ok: ${{ steps.set_merge_ok.outputs.merge_ok }}
     runs-on:
-    - depot-ubuntu-22.04-8
+    - ubuntu-22.04
     steps:
     - id: set_merge_ok
       run: echo 'merge_ok=true' >> ${GITHUB_OUTPUT}
   test_python_linux_arm64:
     env: {}
-    if: (github.repository_owner == 'pantsbuild') && (needs.classify_changes.outputs.no_code != 'true')
+    if: (true) && (needs.classify_changes.outputs.no_code != 'true')
     name: Test Python (Linux-ARM64)
     needs:
     - bootstrap_pants_linux_arm64
     - classify_changes
     runs-on:
-    - depot-ubuntu-24.04-arm-8
+    - ubuntu-24.04-arm
     steps:
     - name: Free up disk space
       uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
@@ -1303,13 +1303,13 @@ jobs:
   test_python_linux_x86_64_0:
     env:
       PANTS_PROCESS_EXECUTION_LOCAL_PARALLELISM: '1'
-    if: (github.repository_owner == 'pantsbuild') && (needs.classify_changes.outputs.no_code != 'true')
+    if: (true) && (needs.classify_changes.outputs.no_code != 'true')
     name: Test Python (Linux-x86_64) Shard 0/10
     needs:
     - bootstrap_pants_linux_x86_64
     - classify_changes
     runs-on:
-    - depot-ubuntu-22.04-8
+    - ubuntu-22.04
     steps:
     - name: Free up disk space
       uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
@@ -1433,13 +1433,13 @@ jobs:
   test_python_linux_x86_64_1:
     env:
       PANTS_PROCESS_EXECUTION_LOCAL_PARALLELISM: '1'
-    if: (github.repository_owner == 'pantsbuild') && (needs.classify_changes.outputs.no_code != 'true')
+    if: (true) && (needs.classify_changes.outputs.no_code != 'true')
     name: Test Python (Linux-x86_64) Shard 1/10
     needs:
     - bootstrap_pants_linux_x86_64
     - classify_changes
     runs-on:
-    - depot-ubuntu-22.04-8
+    - ubuntu-22.04
     steps:
     - name: Free up disk space
       uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
@@ -1563,13 +1563,13 @@ jobs:
   test_python_linux_x86_64_2:
     env:
       PANTS_PROCESS_EXECUTION_LOCAL_PARALLELISM: '1'
-    if: (github.repository_owner == 'pantsbuild') && (needs.classify_changes.outputs.no_code != 'true')
+    if: (true) && (needs.classify_changes.outputs.no_code != 'true')
     name: Test Python (Linux-x86_64) Shard 2/10
     needs:
     - bootstrap_pants_linux_x86_64
     - classify_changes
     runs-on:
-    - depot-ubuntu-22.04-8
+    - ubuntu-22.04
     steps:
     - name: Free up disk space
       uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
@@ -1693,13 +1693,13 @@ jobs:
   test_python_linux_x86_64_3:
     env:
       PANTS_PROCESS_EXECUTION_LOCAL_PARALLELISM: '1'
-    if: (github.repository_owner == 'pantsbuild') && (needs.classify_changes.outputs.no_code != 'true')
+    if: (true) && (needs.classify_changes.outputs.no_code != 'true')
     name: Test Python (Linux-x86_64) Shard 3/10
     needs:
     - bootstrap_pants_linux_x86_64
     - classify_changes
     runs-on:
-    - depot-ubuntu-22.04-8
+    - ubuntu-22.04
     steps:
     - name: Free up disk space
       uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
@@ -1823,13 +1823,13 @@ jobs:
   test_python_linux_x86_64_4:
     env:
       PANTS_PROCESS_EXECUTION_LOCAL_PARALLELISM: '1'
-    if: (github.repository_owner == 'pantsbuild') && (needs.classify_changes.outputs.no_code != 'true')
+    if: (true) && (needs.classify_changes.outputs.no_code != 'true')
     name: Test Python (Linux-x86_64) Shard 4/10
     needs:
     - bootstrap_pants_linux_x86_64
     - classify_changes
     runs-on:
-    - depot-ubuntu-22.04-8
+    - ubuntu-22.04
     steps:
     - name: Free up disk space
       uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
@@ -1953,13 +1953,13 @@ jobs:
   test_python_linux_x86_64_5:
     env:
       PANTS_PROCESS_EXECUTION_LOCAL_PARALLELISM: '1'
-    if: (github.repository_owner == 'pantsbuild') && (needs.classify_changes.outputs.no_code != 'true')
+    if: (true) && (needs.classify_changes.outputs.no_code != 'true')
     name: Test Python (Linux-x86_64) Shard 5/10
     needs:
     - bootstrap_pants_linux_x86_64
     - classify_changes
     runs-on:
-    - depot-ubuntu-22.04-8
+    - ubuntu-22.04
     steps:
     - name: Free up disk space
       uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
@@ -2083,13 +2083,13 @@ jobs:
   test_python_linux_x86_64_6:
     env:
       PANTS_PROCESS_EXECUTION_LOCAL_PARALLELISM: '1'
-    if: (github.repository_owner == 'pantsbuild') && (needs.classify_changes.outputs.no_code != 'true')
+    if: (true) && (needs.classify_changes.outputs.no_code != 'true')
     name: Test Python (Linux-x86_64) Shard 6/10
     needs:
     - bootstrap_pants_linux_x86_64
     - classify_changes
     runs-on:
-    - depot-ubuntu-22.04-8
+    - ubuntu-22.04
     steps:
     - name: Free up disk space
       uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
@@ -2213,13 +2213,13 @@ jobs:
   test_python_linux_x86_64_7:
     env:
       PANTS_PROCESS_EXECUTION_LOCAL_PARALLELISM: '1'
-    if: (github.repository_owner == 'pantsbuild') && (needs.classify_changes.outputs.no_code != 'true')
+    if: (true) && (needs.classify_changes.outputs.no_code != 'true')
     name: Test Python (Linux-x86_64) Shard 7/10
     needs:
     - bootstrap_pants_linux_x86_64
     - classify_changes
     runs-on:
-    - depot-ubuntu-22.04-8
+    - ubuntu-22.04
     steps:
     - name: Free up disk space
       uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
@@ -2343,13 +2343,13 @@ jobs:
   test_python_linux_x86_64_8:
     env:
       PANTS_PROCESS_EXECUTION_LOCAL_PARALLELISM: '1'
-    if: (github.repository_owner == 'pantsbuild') && (needs.classify_changes.outputs.no_code != 'true')
+    if: (true) && (needs.classify_changes.outputs.no_code != 'true')
     name: Test Python (Linux-x86_64) Shard 8/10
     needs:
     - bootstrap_pants_linux_x86_64
     - classify_changes
     runs-on:
-    - depot-ubuntu-22.04-8
+    - ubuntu-22.04
     steps:
     - name: Free up disk space
       uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
@@ -2473,13 +2473,13 @@ jobs:
   test_python_linux_x86_64_9:
     env:
       PANTS_PROCESS_EXECUTION_LOCAL_PARALLELISM: '1'
-    if: (github.repository_owner == 'pantsbuild') && (needs.classify_changes.outputs.no_code != 'true')
+    if: (true) && (needs.classify_changes.outputs.no_code != 'true')
     name: Test Python (Linux-x86_64) Shard 9/10
     needs:
     - bootstrap_pants_linux_x86_64
     - classify_changes
     runs-on:
-    - depot-ubuntu-22.04-8
+    - ubuntu-22.04
     steps:
     - name: Free up disk space
       uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
@@ -2604,13 +2604,13 @@ jobs:
     env:
       ARCHFLAGS: -arch arm64
       _PYTHON_HOST_PLATFORM: macosx-14.0-arm64
-    if: (github.repository_owner == 'pantsbuild') && (needs.classify_changes.outputs.no_code != 'true')
+    if: (true) && (needs.classify_changes.outputs.no_code != 'true')
     name: Test Python (macOS14-ARM64)
     needs:
     - bootstrap_pants_macos14_arm64
     - classify_changes
     runs-on:
-    - depot-macos-14
+    - macos-14
     steps:
     - name: Free up disk space
       uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
@@ -2700,7 +2700,3 @@ jobs:
 name: Pull Request CI
 'on':
   pull_request: {}
-  push:
-    branches:
-    - main
-    - 2.*.x
