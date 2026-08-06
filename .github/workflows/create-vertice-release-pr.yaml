@@ -1,0 +1,96 @@
+name: Create Vertice Release PR
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: The vertice release version to create (MAJOR.MINOR.PATCH+vertice.N e.g. 2.42.4+vertice.0).
+        required: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  github-pr:
+    name: Create a vertice release pull request
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Determine release version
+        id: validate-version
+        run: |
+          version="${{ inputs.version }}"
+
+          if [[ -z "$version" ]]; then
+              echo "::error::An input 'version' must be specified"
+              exit 1
+
+          elif (( ${#version} > 19 )); then
+              echo "::error::The input 'version' must be smaller than 20 characters (i.e. allows '2.99.99+vertice.99')"
+              exit 1
+
+          elif [[ ! "${version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\+vertice\.[0-9]+$ ]]; then
+              echo "::error::The input version '${version}' must be of the form MAJOR.MINOR.PATCH+vertice.N (8.9.10+vertice.99)"
+              exit 1
+          fi
+
+          major_minor=$(echo "$version" | grep -oE '^[0-9]+\.[0-9]+')
+          base_branch="${major_minor}.x"
+
+          echo "::notice::Release version is: ${version}, with major-minor: ${major_minor}"
+          echo "release-version=${version}" >> $GITHUB_OUTPUT
+          echo "major-minor-version=${major_minor}" >> $GITHUB_OUTPUT
+
+          echo "::notice::Base branch is: ${base_branch}"
+          echo "base-branch=${base_branch}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ steps.validate-version.outputs.base-branch }}
+
+      - name: Update VERSION file
+        env:
+          RELEASE_VERSION: ${{ steps.validate-version.outputs.release-version }}
+        run: |
+          if [[ -z "$RELEASE_VERSION" ]]; then
+              echo "::error::The 'RELEASE_VERSION' was empty"
+              exit 1
+          fi
+
+          echo "$RELEASE_VERSION" > src/python/pants/VERSION
+
+      - name: Commit changes and create pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BASE_BRANCH: ${{ steps.validate-version.outputs.base-branch }}
+          RELEASE_VERSION: ${{ steps.validate-version.outputs.release-version }}
+        run: |
+          if [[ -z $(git status --porcelain) ]]; then
+            echo "::error::No changes detected - skipping PR creation"
+            exit 1
+          fi
+
+          # Assign our general account to the local user
+          git config --local user.email "pantsbuild+github-automation@gmail.com"
+          git config --local user.name "Worker Pants (Pantsbuild GitHub Automation Bot)"
+
+          # Create and checkout a new release automation branch
+          BRANCH_NAME="automation/release/$RELEASE_VERSION"
+          git checkout -b "$BRANCH_NAME"
+
+          # Commit and push to the release branch
+          TITLE="Prepare $RELEASE_VERSION"
+          git add src/python/pants/VERSION
+          git commit -m "$TITLE"
+          git push -u origin "$BRANCH_NAME"
+
+          # Create PR from the release automation branch to stable release branch
+          gh pr create \
+            --title "$TITLE" \
+            --body "" \
+            --base "$BASE_BRANCH" \
+            --head "$BRANCH_NAME"

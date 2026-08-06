@@ -156,7 +156,9 @@ NATIVE_FILES = [
 
 DONT_SKIP_RUST = "needs.classify_changes.outputs.rust == 'true'"
 DONT_SKIP_WHEELS = "needs.classify_changes.outputs.release == 'true' || needs.classify_changes.outputs.ci_config == 'true'"
-IS_PANTS_OWNER = "github.repository_owner == 'pantsbuild'"
+# NB: Forced to always-true on this fork so tests, builds, and releases actually run
+# (upstream gates these to the pantsbuild org, which skips everything on a fork).
+IS_PANTS_OWNER = "true"
 
 # NB: This overrides `pants.ci.toml`.
 DISABLE_REMOTE_CACHE_ENV = {"PANTS_REMOTE_CACHE_READ": "false", "PANTS_REMOTE_CACHE_WRITE": "false"}
@@ -480,11 +482,11 @@ class Helper:
     def runs_on(self) -> list[str]:
         ret = []
         if self.platform == Platform.MACOS14_ARM64:
-            ret += ["depot-macos-14"]
+            ret += ["macos-14"]
         elif self.platform == Platform.LINUX_X86_64:
-            ret += ["depot-ubuntu-22.04-8"]
+            ret += ["ubuntu-22.04"]
         elif self.platform == Platform.LINUX_ARM64:
-            ret += ["depot-ubuntu-24.04-arm-8"]
+            ret += ["ubuntu-24.04-arm"]
         elif self.platform == Platform.WINDOWS11_X86_64:
             ret += ["windows-2025-vs2026"]
         else:
@@ -944,7 +946,8 @@ def windows11_x86_64_test_jobs() -> Jobs:
             "name": "Test in-progress Windows support",
             "runs-on": helper.runs_on(),
             "timeout-minutes": 60,
-            "if": IS_PANTS_OWNER,
+            # Disabled on this fork: we only care about macOS and Linux CI here.
+            "if": "false",
             "steps": [
                 *checkout(),
                 {
@@ -1417,10 +1420,62 @@ def release_jobs_and_inputs() -> tuple[Jobs, dict[str, Any]]:
             },
         },
         **wheels_jobs,
-        "publish": {
+        "update_bootstrap_urls": {
+            "name": "Update bootstrap-urls.json",
             "runs-on": "ubuntu-22.04",
             "needs": [*wheels_job_names, "release_info"],
             "if": f"{IS_PANTS_OWNER} && needs.release_info.outputs.is-release == 'true'",
+            "permissions": {
+                "contents": "write",
+                "pull-requests": "write",
+            },
+            "steps": [
+                *checkout(ref="main"),
+                {
+                    "name": "Generate bootstrap-urls.json",
+                    "env": {"GH_TOKEN": f"{gha_expr('github.token')}"},
+                    "run": "python3 build-support/bin/generate-bootstrap-urls.py\n",
+                },
+                {
+                    "name": "Commit changes and create pull request",
+                    "env": {"GH_TOKEN": f"{gha_expr('github.token')}"},
+                    "run": dedent(
+                        """\
+                        if [[ -z $(git status --porcelain) ]]; then
+                          echo "::notice::bootstrap-urls.json is already up to date - skipping PR creation"
+                          exit 0
+                        fi
+
+                        # Assign our general account to the local user
+                        git config --local user.email "pantsbuild+github-automation@gmail.com"
+                        git config --local user.name "Worker Pants (Pantsbuild GitHub Automation Bot)"
+
+                        # Create and checkout a new automation branch
+                        BRANCH_NAME="automation/update-bootstrap-urls-${{ github.run_id }}"
+                        git checkout -b "$BRANCH_NAME"
+
+                        # Commit and push to the automation branch
+                        TITLE="Update bootstrap-urls.json"
+                        git add bootstrap-urls.json
+                        git commit -m "$TITLE"
+                        git push -u origin "$BRANCH_NAME"
+
+                        # Create PR from the automation branch to main
+                        gh pr create \\
+                          --title "$TITLE" \\
+                          --body "" \\
+                          --base main \\
+                          --head "$BRANCH_NAME"
+                        """
+                    ),
+                },
+            ],
+        },
+        "publish": {
+            "runs-on": "ubuntu-22.04",
+            "needs": [*wheels_job_names, "release_info"],
+            # Disabled on this fork.
+            "if": "false",
             "env": {
                 # This job does not actually build anything: only download wheels from S3.
                 "MODE": "debug",
@@ -2004,7 +2059,7 @@ def generate() -> dict[Path, str]:
                 "group": "${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}",
                 "cancel-in-progress": True,
             },
-            "on": {"pull_request": {}, "push": {"branches": ["main", "2.*.x"]}},
+            "on": {"pull_request": {}},
             "jobs": pr_jobs,
             "env": global_env(),
         },
