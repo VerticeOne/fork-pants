@@ -12,7 +12,7 @@ jobs:
       MODE: dist
       PANTS_REMOTE_CACHE_READ: 'false'
       PANTS_REMOTE_CACHE_WRITE: 'false'
-    if: github.repository_owner == 'pantsbuild'
+    if: 'true'
     name: Build wheels (Linux-ARM64)
     needs:
     - release_info
@@ -21,7 +21,7 @@ jobs:
       contents: write
       id-token: write
     runs-on:
-    - depot-ubuntu-24.04-arm-8
+    - ubuntu-24.04-arm
     steps:
     - name: Free up disk space
       run: |-
@@ -140,7 +140,7 @@ jobs:
       MODE: dist
       PANTS_REMOTE_CACHE_READ: 'false'
       PANTS_REMOTE_CACHE_WRITE: 'false'
-    if: github.repository_owner == 'pantsbuild'
+    if: 'true'
     name: Build wheels (Linux-x86_64)
     needs:
     - release_info
@@ -149,7 +149,7 @@ jobs:
       contents: write
       id-token: write
     runs-on:
-    - depot-ubuntu-22.04-8
+    - ubuntu-22.04
     steps:
     - name: Free up disk space
       run: |-
@@ -289,7 +289,7 @@ jobs:
       MODE: dist
       PANTS_REMOTE_CACHE_READ: 'false'
       PANTS_REMOTE_CACHE_WRITE: 'false'
-    if: github.repository_owner == 'pantsbuild'
+    if: 'true'
     name: Build wheels (macOS14-ARM64)
     needs:
     - release_info
@@ -298,7 +298,7 @@ jobs:
       contents: write
       id-token: write
     runs-on:
-    - depot-macos-14
+    - macos-14
     steps:
     - name: Free up disk space
       uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
@@ -434,7 +434,7 @@ jobs:
   publish:
     env:
       MODE: debug
-    if: github.repository_owner == 'pantsbuild' && needs.release_info.outputs.is-release == 'true'
+    if: 'false'
     needs:
     - build_wheels_linux_x86_64
     - build_wheels_linux_arm64
@@ -545,7 +545,7 @@ jobs:
         RELEASE_VERSION="${RELEASE_TAG#release_}"
         gh workflow run sync_docs.yml -F "version=$RELEASE_VERSION" -F "reviewer=${{ github.actor }}" -R pantsbuild/pantsbuild.org
   release_info:
-    if: github.repository_owner == 'pantsbuild'
+    if: 'true'
     name: Create draft release and output info
     outputs:
       build-ref: ${{ steps.get_info.outputs.build-ref }}
@@ -571,7 +571,7 @@ jobs:
         GH_REPO: ${{ github.repository }}
         GH_TOKEN: ${{ github.token }}
       id: make_draft_release
-      if: github.repository_owner == 'pantsbuild' && steps.get_info.outputs.is-release == 'true'
+      if: true && steps.get_info.outputs.is-release == 'true'
       name: Make GitHub Release
       run: |
         RELEASE_TAG=${{ steps.get_info.outputs.build-ref }}
@@ -599,6 +599,58 @@ jobs:
 
         ASSET_UPLOAD_URL=$(gh release view "$RELEASE_TAG" --json uploadUrl --jq '.uploadUrl | sub("\\{\\?.*$"; "")')
         echo "release-asset-upload-url=$ASSET_UPLOAD_URL" >> $GITHUB_OUTPUT
+  update_bootstrap_urls:
+    if: true && needs.release_info.outputs.is-release == 'true'
+    name: Update bootstrap-urls.json
+    needs:
+    - build_wheels_linux_x86_64
+    - build_wheels_linux_arm64
+    - build_wheels_macos14_arm64
+    - release_info
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Check out code
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        fetch-depth: 10
+        ref: main
+    - env:
+        GH_TOKEN: ${{ github.token }}
+      name: Generate bootstrap-urls.json
+      run: |
+        python3 build-support/bin/generate-bootstrap-urls.py
+    - env:
+        GH_TOKEN: ${{ github.token }}
+      name: Commit changes and create pull request
+      run: |
+        if [[ -z $(git status --porcelain) ]]; then
+          echo "::notice::bootstrap-urls.json is already up to date - skipping PR creation"
+          exit 0
+        fi
+
+        # Assign our general account to the local user
+        git config --local user.email "pantsbuild+github-automation@gmail.com"
+        git config --local user.name "Worker Pants (Pantsbuild GitHub Automation Bot)"
+
+        # Create and checkout a new automation branch
+        BRANCH_NAME="automation/update-bootstrap-urls-${{ github.run_id }}"
+        git checkout -b "$BRANCH_NAME"
+
+        # Commit and push to the automation branch
+        TITLE="Update bootstrap-urls.json"
+        git add bootstrap-urls.json
+        git commit -m "$TITLE"
+        git push -u origin "$BRANCH_NAME"
+
+        # Create PR from the automation branch to main
+        gh pr create \
+          --title "$TITLE" \
+          --body "" \
+          --base main \
+          --head "$BRANCH_NAME"
 name: Release
 'on':
   push:
