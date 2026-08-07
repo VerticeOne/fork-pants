@@ -1,0 +1,7 @@
+{
+  "ptex": {
+    "pants.2.33.0+vertice.0-cp314-darwin_arm64.pex": "https://github.com/VerticeOne/fork-pants/releases/download/release_2.33.0%2Bvertice.0/pants.2.33.0.vertice.0-cp314-darwin_arm64.pex",
+    "pants.2.33.0+vertice.0-cp314-linux_aarch64.pex": "https://github.com/VerticeOne/fork-pants/releases/download/release_2.33.0%2Bvertice.0/pants.2.33.0.vertice.0-cp314-linux_aarch64.pex",
+    "pants.2.33.0+vertice.0-cp314-linux_x86_64.pex": "https://github.com/VerticeOne/fork-pants/releases/download/release_2.33.0%2Bvertice.0/pants.2.33.0.vertice.0-cp314-linux_x86_64.pex"
+  }
+}
