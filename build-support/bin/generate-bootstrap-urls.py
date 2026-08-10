@@ -9,6 +9,12 @@
 # the launcher computes from the *running* Pants version (which includes the `+vertice.N`
 # local version segment) to the real download URL of the matching release asset.
 #
+# The freshly-scanned URLs are *merged into* the existing `bootstrap-urls.json` (whatever is
+# already checked out at the repo root, i.e. main's copy) rather than overriding it wholesale.
+# This means entries recorded by earlier runs are never dropped if a release stops showing up
+# in `gh release list` (deleted, beyond the query limit, or a transient scan failure); the
+# freshly-scanned URL wins on conflict for any key present in both.
+#
 
 import json
 import os
@@ -95,6 +101,14 @@ def list_pex_assets(repo: str, tag: str) -> list[GithubReleaseAsset]:
     return json.loads(result.stdout)
 
 
+def load_existing_ptex() -> dict[str, str]:
+    """Reads the `ptex` mapping from the current `bootstrap-urls.json`, if any."""
+    if not OUTPUT_PATH.exists():
+        return {}
+    data = json.loads(OUTPUT_PATH.read_text())
+    return dict(data.get("ptex", {}))
+
+
 def main() -> None:
     if not VERSION_MARKER.exists():
         raise FileNotFoundError(
@@ -107,7 +121,7 @@ def main() -> None:
     releases = list_vertice_releases(repo)
     print(f"Found {len(releases)} vertice release(s): {[r['tagName'] for r in releases]}")
 
-    ptex: dict[str, str] = {}
+    scanned_ptex: dict[str, str] = {}
     for release in releases:
         tag = release["tagName"]
         full_version = tag.removeprefix("release_")
@@ -122,7 +136,17 @@ def main() -> None:
 
             key = f"pants.{full_version}{match['suffix']}"
             print(f"    {key} -> {asset['url']}")
-            ptex[key] = asset["url"]
+            scanned_ptex[key] = asset["url"]
+
+    # Merge the freshly-scanned URLs into the existing file rather than overriding it, so
+    # previously-recorded entries survive even if their release no longer shows up in the scan.
+    # Freshly-scanned URLs win on conflict.
+    existing_ptex = load_existing_ptex()
+    ptex = {**existing_ptex, **scanned_ptex}
+    print(
+        f"\nMerged {len(scanned_ptex)} scanned URL(s) into {len(existing_ptex)} existing "
+        f"entry/entries -> {len(ptex)} total"
+    )
 
     if not ptex:
         print("\nNo vertice pex assets found - nothing to write.")
